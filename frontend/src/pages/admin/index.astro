@@ -1,0 +1,12 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import UploadPanel from '../../components/admin/UploadPanel';
+---
+
+<Layout title="Admin — Aldryck" description="Panel de administración">
+  <section class="px-8 pt-16 pb-24 max-w-4xl mx-auto">
+    <p class="section-label mb-4">Panel</p>
+    <h1 class="heading-editorial mb-16">Administración</h1>
+    <UploadPanel client:load />
+  </section>
+</Layout>

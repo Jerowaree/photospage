@@ -1,0 +1,75 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import GalleryGrid from '../../components/gallery/GalleryGrid';
+import { getPhotos, getCategories } from '../../lib/api';
+import type { Category, Photo } from '../../types';
+
+const { slug } = Astro.params;
+
+let categories: Category[] = [];
+let photos: Photo[] = [];
+let currentCat: Category | undefined;
+
+try {
+  const [catRes, photoRes] = await Promise.all([
+    getCategories(),
+    getPhotos({ category: slug, limit: 48 }),
+  ]);
+  categories = catRes.data;
+  photos = photoRes.data.photos;
+  currentCat = categories.find((c) => c.slug === slug);
+} catch {
+  // API offline during build
+}
+
+// Redirect if category not found and we have categories loaded
+if (!currentCat && categories.length > 0) {
+  return Astro.redirect('/gallery', 302);
+}
+---
+
+<Layout
+  title={`${currentCat?.label ?? slug} — Aldryck Photography`}
+  description={`Fotografías de la categoría ${currentCat?.label ?? slug} por Aldryck.`}
+  ogImage={currentCat?.coverUrl}
+>
+  <!-- Page header -->
+  <section class="px-8 pt-16 pb-12 max-w-7xl mx-auto">
+    <a href="/gallery" class="nav-link mb-6 inline-block">← Atrás</a>
+    <p class="section-label mb-4">{photos.length} fotos</p>
+    <h1 class="heading-editorial capitalize">{currentCat?.label ?? slug}</h1>
+  </section>
+
+  <!-- Category filter tabs -->
+  {categories.length > 0 && (
+    <div class="sticky top-20 z-30 bg-stone-50/90 backdrop-blur-sm
+                border-b border-stone-100 px-8 py-4 mb-8">
+      <div class="max-w-7xl mx-auto flex items-center gap-8 overflow-x-auto scrollbar-none">
+        <a href="/gallery" class="nav-link shrink-0">Todo</a>
+        {categories.map((cat) => (
+          <a
+            href={`/gallery/${cat.slug}`}
+            class:list={['nav-link shrink-0', cat.slug === slug && '!text-stone-900']}
+          >
+            {cat.label}
+            <span class="ml-1 text-stone-300">({cat.count})</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- Gallery grid -->
+  <section class="px-8 pb-24 max-w-7xl mx-auto">
+    {photos.length === 0 ? (
+      <div class="py-32 text-center">
+        <p class="font-serif text-4xl font-light text-stone-300 mb-4">Sin fotos aún</p>
+        <p class="text-stone-400 text-sm tracking-widest uppercase">
+          Esta colección estará disponible pronto
+        </p>
+      </div>
+    ) : (
+      <GalleryGrid photos={photos} client:load />
+    )}
+  </section>
+</Layout>

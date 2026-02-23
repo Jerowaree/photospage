@@ -1,0 +1,119 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import '../styles/globals.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title = 'Aldryck — Fotografía',
+  description = 'Portfolio fotográfico de Aldryck. Fotografía editorial y artística.',
+  ogImage,
+} = Astro.props;
+
+const currentPath = Astro.url.pathname;
+
+const navLinks = [
+  { href: '/gallery',           label: 'Todo el trabajo' },
+  { href: '/gallery/portrait',  label: 'Retrato'         },
+  { href: '/gallery/landscape', label: 'Paisaje'         },
+  { href: '/gallery/editorial', label: 'Editorial'       },
+];
+---
+
+<!doctype html>
+<html lang="es" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:title"       content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type"        content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+    <ViewTransitions />
+  </head>
+  <body class="min-h-screen flex flex-col bg-stone-50 text-stone-900">
+
+    <!-- ─── Header ──────────────────────────────────────────── -->
+    <header
+      transition:name="header"
+      class="fixed top-0 left-0 right-0 z-50 bg-stone-50/90 backdrop-blur-sm border-b border-stone-100"
+    >
+      <!-- Desktop row -->
+      <div class="flex items-center justify-between px-8 py-5">
+        <a href="/" class="logo text-2xl hover:opacity-50 transition-opacity duration-300">
+          Aldryck
+        </a>
+
+        <!-- Desktop nav -->
+        <nav class="hidden md:flex items-center gap-10">
+          {navLinks.map(({ href, label }) => (
+            <a
+              href={href}
+              class:list={[
+                'nav-link',
+                currentPath.startsWith(href) ? '!text-stone-900' : '',
+              ]}
+            >
+              {label}
+            </a>
+          ))}
+        </nav>
+
+        <!-- Admin (invisible dot) -->
+        <a href="/admin" class="text-stone-200 hover:text-stone-400 transition-colors text-xs" title="Admin">
+          ·
+        </a>
+      </div>
+
+      <!-- Mobile nav (always visible, horizontal scroll) -->
+      <div class="md:hidden flex items-center gap-8 px-8 py-3 overflow-x-auto border-t border-stone-100">
+        {navLinks.map(({ href, label }) => (
+          <a
+            href={href}
+            class:list={[
+              'nav-link shrink-0',
+              currentPath.startsWith(href) ? '!text-stone-900' : '',
+            ]}
+          >
+            {label}
+          </a>
+        ))}
+      </div>
+    </header>
+
+    <!-- ─── Main ─────────────────────────────────────────────── -->
+    <main class="flex-1 pt-24 md:pt-20">
+      <slot />
+    </main>
+
+    <!-- ─── Footer ──────────────────────────────────────────── -->
+    <footer class="mt-24 border-t border-stone-100 px-8 py-10">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <span class="logo text-sm text-stone-400">Aldryck</span>
+        <p class="text-xs text-stone-300 tracking-widest uppercase">
+          © {new Date().getFullYear()} — Todos los derechos reservados
+        </p>
+        <div class="flex items-center gap-8">
+          <a href="https://instagram.com" target="_blank" rel="noopener" class="nav-link">
+            Instagram
+          </a>
+          <a href="mailto:contacto@aldryck.com" class="nav-link">Contacto</a>
+        </div>
+      </div>
+    </footer>
+
+  </body>
+</html>

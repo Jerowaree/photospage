@@ -1,0 +1,52 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import GalleryGrid from '../../components/gallery/GalleryGrid';
+import { getPhotos, getCategories } from '../../lib/api';
+import type { Category, Photo } from '../../types';
+
+let categories: Category[] = [];
+let photos: Photo[] = [];
+
+try {
+  const [catRes, photoRes] = await Promise.all([
+    getCategories(),
+    getPhotos({ limit: 48 }),
+  ]);
+  categories = catRes.data;
+  photos = photoRes.data.photos;
+} catch {
+  // API offline during build
+}
+---
+
+<Layout
+  title="Trabajo — Aldryck Fotografía"
+  description="Galería completa de fotografías de Aldryck."
+>
+  <!-- Page header -->
+  <section class="px-8 pt-16 pb-12 max-w-7xl mx-auto">
+    <p class="section-label mb-4">Portfolio</p>
+    <h1 class="heading-editorial">Todo el trabajo</h1>
+  </section>
+
+  <!-- Category filter tabs -->
+  {categories.length > 0 && (
+    <div class="sticky top-20 z-30 bg-stone-50/90 backdrop-blur-sm
+                border-b border-stone-100 px-8 py-4 mb-8">
+      <div class="max-w-7xl mx-auto flex items-center gap-8 overflow-x-auto scrollbar-none">
+        <a href="/gallery" class="nav-link !text-stone-900 shrink-0">Todo</a>
+        {categories.map((cat) => (
+          <a href={`/gallery/${cat.slug}`} class="nav-link shrink-0">
+            {cat.label}
+            <span class="ml-1 text-stone-300">({cat.count})</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- Gallery grid (React island with Framer Motion) -->
+  <section class="px-8 pb-24 max-w-7xl mx-auto">
+    <GalleryGrid photos={photos} client:load />
+  </section>
+</Layout>

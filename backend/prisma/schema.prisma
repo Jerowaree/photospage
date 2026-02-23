@@ -1,0 +1,32 @@
+// Prisma Schema — Aldryck Photography
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Photo {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  category    String
+  tags        String[]
+  url         String
+  thumbnailUrl String
+  publicId    String   @unique
+  width       Int
+  height      Int
+  aspectRatio Float
+  featured    Boolean  @default(false)
+  uploadedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category, uploadedAt(sort: Desc)])
+  @@index([featured])
+  @@index([tags])
+}
